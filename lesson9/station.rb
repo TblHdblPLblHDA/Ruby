@@ -12,9 +12,8 @@ class Station
   TITLE_FORMAT = /[a-z]/i.freeze
   @all_station = []
 
-  validate(:name, :presence)
-  validate(:name, :type, String)
-  validate(:name, :format, TITLE_FORMAT)
+  validate :name, :presence
+  validate :name, :type, String
 
   def self.all
     @all_station

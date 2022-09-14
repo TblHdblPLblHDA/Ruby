@@ -12,6 +12,9 @@ class Train
   NUMBER_FORMAT = /^[a-z|\d]{3}-*[a-z|\d]{2}$/i.freeze
   @@all_trains = []
 
+  validate :number, :presence
+  validate :number, :format, NUMBER_FORMAT
+
   def self.all 
     @all_trains
   end

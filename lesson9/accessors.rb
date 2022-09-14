@@ -1,30 +1,37 @@
-module Acсessors
-  def attr_accessor_with_history(*arguments)
-    arguments.each do |argument|
-      var_name = "@#{argument}".to_sym
-      history = "@#{argument}_history"
+module Accessors
+  def self.included(base)
+    base.extend ClassMethods
+    base.include InstanceMethods
+  end
 
-      arr = []
+  module ClassMethods
+    def attr_accessor_with_history(*names)
+      name.each do |name|
+        history_var = "@#{name}_history".to_sym
+        var_name = "@#{name}".to_sym
 
-      define_method(argument) { instance_variable_get(var_name) }
-      define_method("#{argument}_history".to_sym) { instance_variable_get(history)}
+        define_method(name) { instance_variable(var_name) }
 
-      define_method("#{argument}=".to_sym) do |value| 
-        instance_variable_set(var_name, value)
-        instance_variable_set(history, arr.push(value))
+        history = instance_variable_get(history_var) || []
+
+        define_method("#{name}=") do |value|
+          instance_variable_set(var_name, value)
+          history << value
+          instance_variable_set(history_var, history)
+        end
+        define_method("#{name}_history") {instance_variable_get(history_var)}
       end
     end
   end
-
-  def strong_attr_accessor(name, klass)
-    var_name = "@#{name}"
-
-    define_method(name) { instance_variable_get(var_name) }
-    define_method("#{name}=") do |value|
-     if value.class.to_s != klass.to_s
-      raise "Wrong type"
-     end
-     instance_variable_set(var_name, value)
+  
+  module InstanceMethods
+    def strong_attr_accessor(attribute, klass)
+      name = "@#{attribute}".to_sym
+      define_method(attribute) { instance_variable_get(name) }
+      define_method("#{attribute}=".to_sym) do |value|
+        raise "#{value} должно быть класса #{klass}" unless value.is_a?(klass)
+        instance_variable_set(name, value)
+      end
     end
   end
 end

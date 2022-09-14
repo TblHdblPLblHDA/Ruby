@@ -5,37 +5,40 @@ module Validation
   end
 
   module ClassMethods
-    def validate(attr_name, validation_type, option = nil)
-      args = args[0]
+    def validations
       @validations ||= []
-      @validations.push(attr_name: attr_name, validation_type: validation_type, options: args)
+    end
 
-      def validations
-        @validations
-      end
+    def validate(name, validation_type, validation_param = nil)
+      options = {
+        name: name, validation_type: validation_type, validation_param: validation_param
+      }
+      instance_variable_set(:@validations, validations << options)
     end
   end
 
   module InstanceMethods
-    def validate!
-      self.class.validations.each do |validation|
-        value = self.send(validation[:attr_name])
-
-        case validation[:validation_type]
-        when :presence
-          raise "@#{value} is empty or nil." if value.nil? || value.to_s.empty?
-        when :type
-          raise "Wrong type of @#{value}." unless value.is_a? validation[:options]
-        when :format
-          raise "Wrong format of @#{value}." unless value.match?(validation[:options])
-        end
-      end
-    end
-
     def valid?
       validate!
+      true
     rescue StandardError
       false
+    end
+
+    def validate!
+      self.class.validations.each do |options| 
+        name, validaton_type, optional_parameter = options.values
+        value = instance_variable_get("@#{name}".to_sym)
+
+        case validaton_type
+        when :presence
+          raise ArgumentError, 'Должно быть название или номер!' if value.nil? || value.to_s.empty?
+        when :format
+          raise ArgumentError, 'Неверный формат!' unless value =~ optional_parameter
+        when :type
+          raise TypeError, 'Неверный тип!' unless value.is_a?(optional_parameter)
+        end
+      end
     end
   end
 end
