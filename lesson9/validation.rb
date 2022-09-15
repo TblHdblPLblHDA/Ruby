@@ -32,11 +32,11 @@ module Validation
 
         case validaton_type
         when :presence
-          raise ArgumentError, 'Должно быть название или номер!' if value.nil? || value.to_s.empty?
+          raise ArgumentError, 'Должно быть название или номер! "@#{name}"' if value.nil? || value.to_s.empty?
         when :format
           raise ArgumentError, 'Неверный формат!' unless value =~ optional_parameter
         when :type
-          raise TypeError, 'Неверный тип!' unless value.is_a?(optional_parameter)
+          raise TypeError, 'Неверный тип! "@#{name}"' unless value.is_a?(optional_parameter)
         end
       end
     end
